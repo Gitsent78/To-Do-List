@@ -1,0 +1,183 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a0a;
+  --surface: #131313;
+  --surface2: #1c1c1c;
+  --accent: #c8f04a;
+  --red: #ff5c5c;
+  --text: #f0f0f0;
+  --muted: #555;
+  --border: #222;
+  --font-head: 'Syne', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
+
+.app { width: 100%; max-width: 580px; }
+
+/* HEADER */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 2rem;
+}
+h1 {
+  font-family: var(--font-head);
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -2px;
+  color: var(--accent);
+}
+#count {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* FORM */
+#task-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+#task-input {
+  flex: 1;
+  min-width: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+#task-input:focus { border-color: var(--accent); }
+
+#due-date {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 0.75rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+#due-date:focus { border-color: var(--accent); color: var(--text); }
+
+#task-form button {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+#task-form button:hover { opacity: 0.85; }
+
+/* FILTERS */
+.filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.filter {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 0.35rem 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter.active, .filter:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* TASK LIST */
+#task-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+
+.task-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  animation: slideIn 0.25s ease;
+  transition: border-color 0.2s;
+}
+.task-item:hover { border-color: #333; }
+.task-item.done { opacity: 0.45; }
+.task-item.done .task-text { text-decoration: line-through; color: var(--muted); }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.check-btn {
+  width: 20px; height: 20px;
+  border: 2px solid var(--muted);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; color: #000;
+}
+.task-item.done .check-btn { background: var(--accent); border-color: var(--accent); }
+
+.task-info { flex: 1; }
+.task-text { font-size: 0.88rem; display: block; }
+.task-due {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+}
+.task-due.overdue { color: var(--red); }
+
+.del-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  transition: color 0.2s, background 0.2s;
+}
+.del-btn:hover { color: var(--red); background: rgba(255,92,92,0.08); }
+
+/* EMPTY */
+#empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 3rem;
+  display: none;
+}
+#empty.visible { display: block; }
