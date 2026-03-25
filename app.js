@@ -1,7 +1,9 @@
 // 1. Initialize Supabase
 const SUPABASE_URL = 'https://sgwajegseuzxzeblffar.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNnd2FqZWdzZXV6eHplYmxmZmFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjAyNTgsImV4cCI6MjA4OTk5NjI1OH0.unMtsCMg7WqNeMQ1mCEplQTJnva1_36It7LW8W4tb_A';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// CHANGED: Renamed to 'supabaseClient' to avoid collision with the global CDN object
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let tasks = [];
 let filter = 'all';
@@ -13,9 +15,10 @@ const list     = document.getElementById('task-list');
 const empty    = document.getElementById('empty');
 const countEl  = document.getElementById('count');
 
-// 2. Fetch tasks from Supabase on load
+// 2. Fetch tasks
 async function fetchTasks() {
-  const { data, error } = await supabase
+  // CHANGED: Using supabaseClient instead of supabase
+  const { data, error } = await supabaseClient
     .from('tasks')
     .select('*')
     .order('created_at', { ascending: false });
@@ -56,14 +59,15 @@ function render() {
   empty.classList.toggle('visible', filtered.length === 0);
 }
 
-// 4. Add new task to Supabase
+// 4. Add new task
 form.addEventListener('submit', async e => {
   e.preventDefault();
   
   const text = input.value.trim();
   const due = dateInput.value || null;
 
-  const { data, error } = await supabase
+  // CHANGED: Using supabaseClient
+  const { data, error } = await supabaseClient
     .from('tasks')
     .insert([{ text, due, done: false }])
     .select();
@@ -77,7 +81,7 @@ form.addEventListener('submit', async e => {
   }
 });
 
-// 5. Update (Check) or Delete tasks
+// 5. Update or Delete tasks
 list.addEventListener('click', async e => {
   const checkBtn = e.target.closest('.check-btn');
   const delBtn = e.target.closest('.del-btn');
@@ -89,12 +93,11 @@ list.addEventListener('click', async e => {
 
     const newDoneStatus = !task.done;
 
-    // Optimistic UI update
     task.done = newDoneStatus;
     render();
 
-    // Send update to Supabase
-    const { error } = await supabase
+    // CHANGED: Using supabaseClient
+    const { error } = await supabaseClient
       .from('tasks')
       .update({ done: newDoneStatus })
       .eq('id', id);
@@ -108,12 +111,11 @@ list.addEventListener('click', async e => {
   } else if (delBtn) {
     const id = delBtn.dataset.id;
     
-    // Optimistic UI update
     tasks = tasks.filter(t => String(t.id) !== String(id));
     render();
 
-    // Send delete to Supabase
-    const { error } = await supabase
+    // CHANGED: Using supabaseClient
+    const { error } = await supabaseClient
       .from('tasks')
       .delete()
       .eq('id', id);
@@ -132,5 +134,4 @@ document.querySelectorAll('.filter').forEach(btn => {
   });
 });
 
-// Initialize app
 fetchTasks();
