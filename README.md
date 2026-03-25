@@ -1,6 +1,6 @@
 # TASKR — To-Do List App
 
-A dark mode full-stack To-Do List app built with HTML, CSS, JavaScript, Node.js, Express, and MySQL.
+A dark mode To-Do List app built with HTML, CSS, JavaScript, and Supabase (PostgreSQL). Hosted seamlessly on Vercel.
 
 ---
 
@@ -8,12 +8,9 @@ A dark mode full-stack To-Do List app built with HTML, CSS, JavaScript, Node.js,
 
 | File | Purpose |
 |---|---|
-| `index.html` | Frontend structure |
+| `index.html` | Frontend structure & Supabase CDN import |
 | `style.css` | Dark mode styling |
-| `app.js` | Frontend logic |
-| `server.js` | Backend API routes |
-| `db.js` | MySQL connection config |
-| `setup.sql` | Database & table setup |
+| `app.js` | Frontend logic & Database communication |
 
 ---
 
@@ -24,68 +21,23 @@ A dark mode full-stack To-Do List app built with HTML, CSS, JavaScript, Node.js,
 - ✅ Mark tasks as complete
 - ✅ Due dates with overdue alerts
 - ✅ Filter by All / Pending / Done
-- ✅ MySQL database (data persists)
+- ✅ Supabase PostgreSQL backend (data persists)
+- ✅ Optimistic UI rendering for instant feedback
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started (Local Development)
 
-### 1. Install dependencies
-```bash
-npm init -y
-npm install express mysql2
-```
+Because this app uses a serverless architecture, no local backend server is required.
 
-### 2. Set up MySQL database
-```bash
-mysql -u root -p < setup.sql
-```
-
-### 3. Update your credentials in `db.js`
-```js
-user: 'root',      // your MySQL username
-password: '',      // your MySQL password
-```
-
-### 4. Start the server
-```bash
-node server.js
-```
-
-### 5. Open in browser
-```
-http://localhost:3000
-```
-
----
-
-## 🗄️ Database Schema
-
-```sql
-TABLE tasks (
-  id         INT AUTO_INCREMENT PRIMARY KEY,
-  text       VARCHAR(255) NOT NULL,
-  due        DATE DEFAULT NULL,
-  done       BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
-```
-
----
-
-## 🌐 API Endpoints
-
-| Method | Route | Description |
-|---|---|---|
-| GET | `/api/tasks` | Get all tasks |
-| POST | `/api/tasks` | Create a new task |
-| PATCH | `/api/tasks/:id` | Update a task (done/undone) |
-| DELETE | `/api/tasks/:id` | Delete a task |
+1. Clone the repository.
+2. Open `index.html` directly in your browser or use a tool like VS Code Live Server.
+3. Replace the `SUPABASE_URL` and `SUPABASE_KEY` in `app.js` with your own project credentials.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** HTML5, CSS3, JavaScript
-- **Backend:** Node.js, Express
-- **Database:** MySQL
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript
+- **Backend / Database:** Supabase (PostgreSQL)
+- **Hosting:** Vercel

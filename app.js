@@ -1,4 +1,4 @@
-// 1. Initialize Supabase (Replace with your actual keys from Supabase Dashboard)
+// 1. Initialize Supabase
 const SUPABASE_URL = 'https://sgwajegseuzxzeblffar.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNnd2FqZWdzZXV6eHplYmxmZmFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjAyNTgsImV4cCI6MjA4OTk5NjI1OH0.unMtsCMg7WqNeMQ1mCEplQTJnva1_36It7LW8W4tb_A';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -71,7 +71,7 @@ form.addEventListener('submit', async e => {
   if (error) {
     console.error('Error adding task:', error);
   } else {
-    tasks.unshift(data[0]); // Add the new task to the top of our local array
+    tasks.unshift(data[0]); 
     input.value = ''; dateInput.value = '';
     render();
   }
@@ -79,32 +79,28 @@ form.addEventListener('submit', async e => {
 
 // 5. Update (Check) or Delete tasks
 list.addEventListener('click', async e => {
-  // Use .closest() to reliably get the button even if a child element is clicked
   const checkBtn = e.target.closest('.check-btn');
   const delBtn = e.target.closest('.del-btn');
 
   if (checkBtn) {
     const id = checkBtn.dataset.id;
-    
-    // Safely find the task by converting both IDs to Strings
     const task = tasks.find(t => String(t.id) === String(id));
-    if (!task) return; // Safety check
+    if (!task) return; 
 
     const newDoneStatus = !task.done;
 
-    // 1. Optimistic UI update (updates the screen instantly)
+    // Optimistic UI update
     task.done = newDoneStatus;
     render();
 
-    // 2. Send update to Supabase
+    // Send update to Supabase
     const { error } = await supabase
       .from('tasks')
       .update({ done: newDoneStatus })
       .eq('id', id);
 
     if (error) {
-      console.error('Error updating task in Supabase:', error);
-      // Revert UI if database update fails
+      console.error('Error updating task:', error);
       task.done = !newDoneStatus; 
       render();
     }
@@ -112,17 +108,17 @@ list.addEventListener('click', async e => {
   } else if (delBtn) {
     const id = delBtn.dataset.id;
     
-    // 1. Optimistic UI update
+    // Optimistic UI update
     tasks = tasks.filter(t => String(t.id) !== String(id));
     render();
 
-    // 2. Send delete to Supabase
+    // Send delete to Supabase
     const { error } = await supabase
       .from('tasks')
       .delete()
       .eq('id', id);
 
-    if (error) console.error('Error deleting task in Supabase:', error);
+    if (error) console.error('Error deleting task:', error);
   }
 });
 
