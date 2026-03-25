@@ -1,4 +1,9 @@
-let tasks = JSON.parse(localStorage.getItem('taskr') || '[]');
+// 1. Initialize Supabase (Replace with your actual keys from Supabase Dashboard)
+const SUPABASE_URL = 'https://sgwajegseuzxzeblffar.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNnd2FqZWdzZXV6eHplYmxmZmFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjAyNTgsImV4cCI6MjA4OTk5NjI1OH0.unMtsCMg7WqNeMQ1mCEplQTJnva1_36It7LW8W4tb_A';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let tasks = [];
 let filter = 'all';
 
 const form     = document.getElementById('task-form');
@@ -8,8 +13,22 @@ const list     = document.getElementById('task-list');
 const empty    = document.getElementById('empty');
 const countEl  = document.getElementById('count');
 
-function save() { localStorage.setItem('taskr', JSON.stringify(tasks)); }
+// 2. Fetch tasks from Supabase on load
+async function fetchTasks() {
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('*')
+    .order('created_at', { ascending: false });
 
+  if (error) {
+    console.error('Error fetching tasks:', error);
+  } else {
+    tasks = data;
+    render();
+  }
+}
+
+// 3. Render function
 function render() {
   list.innerHTML = '';
   const filtered = tasks.filter(t =>
@@ -37,23 +56,63 @@ function render() {
   empty.classList.toggle('visible', filtered.length === 0);
 }
 
-form.addEventListener('submit', e => {
+// 4. Add new task to Supabase
+form.addEventListener('submit', async e => {
   e.preventDefault();
-  tasks.unshift({ id: Date.now(), text: input.value.trim(), due: dateInput.value, done: false });
-  input.value = ''; dateInput.value = '';
-  save(); render();
-});
+  
+  const text = input.value.trim();
+  const due = dateInput.value || null;
 
-list.addEventListener('click', e => {
-  const id = +e.target.dataset.id;
-  if (e.target.classList.contains('check-btn')) {
-    tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
-  } else if (e.target.classList.contains('del-btn')) {
-    tasks = tasks.filter(t => t.id !== id);
+  const { data, error } = await supabase
+    .from('tasks')
+    .insert([{ text, due, done: false }])
+    .select();
+
+  if (error) {
+    console.error('Error adding task:', error);
+  } else {
+    tasks.unshift(data[0]); // Add the new task to the top of our local array
+    input.value = ''; dateInput.value = '';
+    render();
   }
-  save(); render();
 });
 
+// 5. Update (Check) or Delete tasks
+list.addEventListener('click', async e => {
+  const id = parseInt(e.target.dataset.id);
+
+  if (e.target.classList.contains('check-btn')) {
+    const task = tasks.find(t => t.id === id);
+    const newDoneStatus = !task.done;
+
+    // Optimistic UI update
+    task.done = newDoneStatus;
+    render();
+
+    // Send update to Supabase
+    const { error } = await supabase
+      .from('tasks')
+      .update({ done: newDoneStatus })
+      .eq('id', id);
+
+    if (error) console.error('Error updating task:', error);
+
+  } else if (e.target.classList.contains('del-btn')) {
+    // Optimistic UI update
+    tasks = tasks.filter(t => t.id !== id);
+    render();
+
+    // Send delete to Supabase
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('id', id);
+
+    if (error) console.error('Error deleting task:', error);
+  }
+});
+
+// 6. Filtering logic
 document.querySelectorAll('.filter').forEach(btn => {
   btn.addEventListener('click', () => {
     filter = btn.dataset.filter;
@@ -63,4 +122,5 @@ document.querySelectorAll('.filter').forEach(btn => {
   });
 });
 
-render();
+// Initialize app
+fetchTasks();
