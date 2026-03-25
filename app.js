@@ -79,36 +79,50 @@ form.addEventListener('submit', async e => {
 
 // 5. Update (Check) or Delete tasks
 list.addEventListener('click', async e => {
-  const id = parseInt(e.target.dataset.id);
+  // Use .closest() to reliably get the button even if a child element is clicked
+  const checkBtn = e.target.closest('.check-btn');
+  const delBtn = e.target.closest('.del-btn');
 
-  if (e.target.classList.contains('check-btn')) {
-    const task = tasks.find(t => t.id === id);
+  if (checkBtn) {
+    const id = checkBtn.dataset.id;
+    
+    // Safely find the task by converting both IDs to Strings
+    const task = tasks.find(t => String(t.id) === String(id));
+    if (!task) return; // Safety check
+
     const newDoneStatus = !task.done;
 
-    // Optimistic UI update
+    // 1. Optimistic UI update (updates the screen instantly)
     task.done = newDoneStatus;
     render();
 
-    // Send update to Supabase
+    // 2. Send update to Supabase
     const { error } = await supabase
       .from('tasks')
       .update({ done: newDoneStatus })
       .eq('id', id);
 
-    if (error) console.error('Error updating task:', error);
+    if (error) {
+      console.error('Error updating task in Supabase:', error);
+      // Revert UI if database update fails
+      task.done = !newDoneStatus; 
+      render();
+    }
 
-  } else if (e.target.classList.contains('del-btn')) {
-    // Optimistic UI update
-    tasks = tasks.filter(t => t.id !== id);
+  } else if (delBtn) {
+    const id = delBtn.dataset.id;
+    
+    // 1. Optimistic UI update
+    tasks = tasks.filter(t => String(t.id) !== String(id));
     render();
 
-    // Send delete to Supabase
+    // 2. Send delete to Supabase
     const { error } = await supabase
       .from('tasks')
       .delete()
       .eq('id', id);
 
-    if (error) console.error('Error deleting task:', error);
+    if (error) console.error('Error deleting task in Supabase:', error);
   }
 });
 
